@@ -6,3 +6,6 @@
 
 # JetBrains IDE
 .idea/
+
+# venv
+venv/
