@@ -7,10 +7,56 @@ from flask import Flask
 from webargs import fields
 from webargs.flaskparser import use_args
 
+from db import DB
+
 app = Flask(__name__)
 
+db = DB(db_file="sql_lite.db")
 
-@app.route('/requirements/')
+
+@app.route('/phones/create')
+@use_args({"name": fields.Str(required=True), "phone": fields.Str(required=True)}, location="query")
+def phones__create(kwargs):
+    db.create_connection()
+    sql_insert_phone_query = 'INSERT INTO phones (contactName, phoneValue) VALUES (:name, :phone);'
+    db.conn.execute(sql_insert_phone_query, {'name': kwargs['name'], 'phone': kwargs['phone']})
+    db.conn.commit()
+    db.close_connection()
+    return 'Ok'
+
+
+@app.route('/phones/read-all')
+def phones__read_all():
+    db.create_connection()
+    phones = db.conn.execute('SELECT * FROM phones;').fetchall()
+    db.close_connection()
+    all_data = [f'{phone_id["phoneID"]}: {phone_id["contactName"]}, {phone_id["phoneValue"]}' for phone_id in phones]
+    return '<br>'.join(all_data)
+
+
+@app.route('/phones/update/<int:pk>')
+@use_args({"phone": fields.Str(required=True)}, location="query")
+def phones__update(kwargs, pk):
+    db.create_connection()
+    db.conn.execute('''UPDATE phones
+                       SET phoneValue=:phone
+                       WHERE (phoneID=:pk);''', {'phone': kwargs['phone'], 'pk': pk})
+    db.conn.commit()
+    db.close_connection()
+    return 'Ok'
+
+
+@app.route('/phones/delete/<int:pk>')
+def phones__delete(pk):
+    db.create_connection()
+    db.conn.execute('''DELETE FROM phones 
+                       WHERE (phoneID=:pk);''', {'pk': pk})
+    db.conn.commit()
+    db.close_connection()
+    return 'Ok'
+
+
+@app.route('/requirements')
 def get_requirements_text() -> str:
     """
     :return: content of requirements.txt file
