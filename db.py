@@ -19,8 +19,6 @@ class DB:
         except Error as e:
             print(e)
 
-        return self.conn
-
     def close_connection(self):
         """ close database connection
         :return:
