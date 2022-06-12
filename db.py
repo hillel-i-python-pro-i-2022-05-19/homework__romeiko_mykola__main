@@ -1,3 +1,4 @@
+import logging
 import sqlite3
 from sqlite3 import Error
 
@@ -17,7 +18,7 @@ class DB:
             self.conn = sqlite3.connect(self.db_file)
             self.conn.row_factory = sqlite3.Row
         except Error as e:
-            print(e)
+            logging.exception(e)
 
     def close_connection(self):
         """ close database connection
@@ -26,7 +27,7 @@ class DB:
         try:
             self.conn.close()
         except Error as e:
-            print(e)
+            logging.exception(e)
 
         return self.conn
 
@@ -39,7 +40,7 @@ class DB:
             c = self.conn.cursor()
             c.execute(create_table_sql)
         except Error as e:
-            print(e)
+            logging.exception(e)
 
     def create_all_tables(self):
         sql_create_phones_table = """CREATE TABLE IF NOT EXISTS phones (
